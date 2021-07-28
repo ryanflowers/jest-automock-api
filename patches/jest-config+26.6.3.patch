@@ -1,0 +1,48 @@
+diff --git a/node_modules/jest-config/build/Descriptions.js b/node_modules/jest-config/build/Descriptions.js
+index bb1d541..344ad8d 100644
+--- a/node_modules/jest-config/build/Descriptions.js
++++ b/node_modules/jest-config/build/Descriptions.js
+@@ -13,6 +13,7 @@ exports.default = void 0;
+  */
+ const descriptions = {
+   automock: 'All imported modules in your tests should be mocked automatically',
++  automockPattern: 'Module Regex pattern. This can be used to filter dependency automocking for the unit under test.',
+   bail: 'Stop running tests after `n` failures',
+   cacheDirectory:
+     'The directory where Jest should store its cached dependency information',
+diff --git a/node_modules/jest-config/build/ValidConfig.js b/node_modules/jest-config/build/ValidConfig.js
+index 3bc2e9a..73ed1e7 100644
+--- a/node_modules/jest-config/build/ValidConfig.js
++++ b/node_modules/jest-config/build/ValidConfig.js
+@@ -38,6 +38,7 @@ const NODE_MODULES_REGEXP = (0, _jestRegexUtil().replacePathSepForRegex)(
+ );
+ const initialOptions = {
+   automock: false,
++  automockPattern: '.*',
+   bail: (0, _jestValidate().multipleValidOptions)(false, 0),
+   cache: true,
+   cacheDirectory: '/tmp/user/jest',
+diff --git a/node_modules/jest-config/build/index.js b/node_modules/jest-config/build/index.js
+index 05bb9ee..3a96103 100644
+--- a/node_modules/jest-config/build/index.js
++++ b/node_modules/jest-config/build/index.js
+@@ -296,6 +296,7 @@ const groupOptions = options => ({
+   }),
+   projectConfig: Object.freeze({
+     automock: options.automock,
++    automockPattern: options.automockPattern,
+     cache: options.cache,
+     cacheDirectory: options.cacheDirectory,
+     clearMocks: options.clearMocks,
+diff --git a/node_modules/jest-config/build/normalize.js b/node_modules/jest-config/build/normalize.js
+index 1922303..216d4db 100644
+--- a/node_modules/jest-config/build/normalize.js
++++ b/node_modules/jest-config/build/normalize.js
+@@ -1022,6 +1022,7 @@ function normalize(initialOptions, argv, configPath, projectIndex = Infinity) {
+       }
+ 
+       case 'automock':
++      case 'automockPattern':
+       case 'cache':
+       case 'changedSince':
+       case 'changedFilesWithAncestor':
