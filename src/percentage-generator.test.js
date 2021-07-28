@@ -1,4 +1,14 @@
-// TODO Should return the unit from the next line and hoist the next line to ensure that the deps are registered prior to import.
+/** 
+ * TODO - A couple of items to do here.. 
+ * The auto mock api call needs to be hoisted however I have not implemented it in the patch at this time.
+ * 
+ * The current file uses the dependencies of the unit under test to get at the mocks. Therefore the unit under test needs to be imported first.
+ * There are a couple ways we can get around this
+ * 1 - When calling autoMock crawl deps in the file and register them with mock cache.
+ * 2 - After hoisting the autoMock call return the module from the api. This would change the usage to be like so..
+ *     const PercentageGenerator = jest.autoMock("./percentage-generator.js");
+**/
+
 jest.autoMock("./percentage-generator.js");
 const PercentageGenerator = require('./percentage-generator');
 
