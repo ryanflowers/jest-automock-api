@@ -6,7 +6,7 @@
 module.exports = {
 
   // When using setUnit within a test match prefix of
-  // './' or '../' as dependencies of the unit.
+  // './' or '../' as dependencies of the unit to be mocked.
   automockPattern: "^((.(.?)/)(S)*)+",
 
   // All imported modules in your tests should be mocked automatically
