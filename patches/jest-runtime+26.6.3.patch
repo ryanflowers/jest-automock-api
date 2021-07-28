@@ -1,0 +1,113 @@
+diff --git a/node_modules/jest-runtime/build/index.js b/node_modules/jest-runtime/build/index.js
+index 1c13b1d..f12008c 100644
+--- a/node_modules/jest-runtime/build/index.js
++++ b/node_modules/jest-runtime/build/index.js
+@@ -302,6 +302,9 @@ class Runtime {
+     coverageOptions, // TODO: Make mandatory in Jest 27
+     testPath
+   ) {
++    
++    _defineProperty(this, '_automockPattern', void 0);
++
+     _defineProperty(this, '_cacheFS', void 0);
+ 
+     _defineProperty(this, '_config', void 0);
+@@ -370,6 +373,8 @@ class Runtime {
+ 
+     _defineProperty(this, 'jestGlobals', void 0);
+ 
++    _defineProperty(this, '_units', void 0);
++
+     _defineProperty(
+       this,
+       'unstable_shouldLoadAsEsm',
+@@ -389,6 +394,7 @@ class Runtime {
+     this._currentlyExecutingModulePath = '';
+     this._environment = environment;
+     this._explicitShouldMock = new Map();
++    this._units = new Map();
+     this._internalModuleRegistry = new Map();
+     this._isCurrentlyExecutingManualMock = null;
+     this._mainModule = null;
+@@ -436,6 +442,10 @@ class Runtime {
+       });
+     }
+ 
++    if(config.automockPattern) {
++      this._automockPattern = new RegExp(config.automockPattern);
++    }
++
+     this.resetModules();
+   }
+ 
+@@ -1123,6 +1133,8 @@ class Runtime {
+ 
+     this._explicitShouldMock.clear();
+ 
++    this._units.clear();
++
+     this._transitiveShouldMock.clear();
+ 
+     this._virtualMocks.clear();
+@@ -1526,24 +1538,36 @@ class Runtime {
+ 
+     const key = from + path().delimiter + moduleID;
+ 
++    // Above all explicit mocks defined by the consumer should be honored.
+     if (explicitShouldMock.has(moduleID)) {
+       // guaranteed by `has` above
+       return explicitShouldMock.get(moduleID);
+     }
+ 
+-    if (
+-      !this._shouldAutoMock ||
+-      this._resolver.isCoreModule(moduleName) ||
+-      this._shouldUnmockTransitiveDependenciesCache.get(key)
+-    ) {
++    // If the module is defined in the transitive cache to be unmocked honor that.
++    if(this._shouldUnmockTransitiveDependenciesCache.get(key)) {
+       return false;
+     }
+ 
++    // If the mock is already defined in mock cache use that.
+     if (this._shouldMockModuleCache.has(moduleID)) {
+       // guaranteed by `has` above
+       return this._shouldMockModuleCache.get(moduleID);
+     }
+ 
++    // Allow for auto mocking of specified units
++    let passesAutoMockPattern = !this._automockPattern || 
++    (this._automockPattern && this._automockPattern.test(moduleName));
++    let shouldAutoMockModule = passesAutoMockPattern && this._units.has(from); 
++
++    // If the module is a core module do not mock
++    if (
++      (!shouldAutoMockModule && !this._shouldAutoMock) ||
++      this._resolver.isCoreModule(moduleName)
++    ) {
++      return false;
++    }
++
+     let modulePath;
+ 
+     try {
+@@ -1691,6 +1715,11 @@ class Runtime {
+       return jestObject;
+     };
+ 
++    const autoMock = (moduleName) => {
++      const path = this._requireResolve(from, moduleName);
++      this._units.set(path);
++    }
++
+     const mock = (moduleName, mockFactory, options) => {
+       if (mockFactory !== undefined) {
+         return setMockFactory(moduleName, mockFactory, options);
+@@ -1824,6 +1853,7 @@ class Runtime {
+       isMockFunction: this._moduleMocker.isMockFunction,
+       isolateModules,
+       mock,
++      autoMock,
+       requireActual: this.requireActual.bind(this, from),
+       requireMock: this.requireMock.bind(this, from),
+       resetAllMocks,

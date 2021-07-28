@@ -1,0 +1,25 @@
+{
+  "name": "jest-automock-api",
+  "version": "1.0.0",
+  "description": "This repo is a demonstration of support of an auto mock api in jest. Currently jest has no idea what the unit under test is and treats all imports as equal. The only way to leverage jests automock infra is by single package mocking or globally via config. However this is not enough. At last not for a large mono repo. In this type of repo most of your dependencies will be internal packages of the repo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "postinstall": "patch-package"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryanflowers/jest-automock-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryanflowers/jest-automock-api/issues"
+  },
+  "homepage": "https://github.com/ryanflowers/jest-automock-api#readme",
+  "devDependencies": {
+    "jest": "26.6.3",
+    "patch-package": "^6.4.7",
+    "rxjs": "7.2.0"
+  }
+}
